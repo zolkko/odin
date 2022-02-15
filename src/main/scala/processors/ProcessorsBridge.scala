@@ -4,7 +4,9 @@ import _root_.processors.api.SentimentScores
 import org.clulab.odin.{ ExtractorEngine, Mention }
 import org.clulab.processors.{ Document, Processor, Sentence }
 import org.clulab.processors.corenlp.CoreNLPSentimentAnalyzer
-import org.clulab.processors.bionlp.BioNLPProcessor
+
+import scala.io.Source
+//import org.clulab.processors.bionlp.BioNLPProcessor
 import org.clulab.processors.clu.CluProcessor
 import org.clulab.processors.fastnlp.FastNLPProcessor
 import org.clulab.processors.shallownlp.ShallowNLPProcessor
@@ -18,7 +20,17 @@ object ProcessorsBridge {
   // initialize a processor
   // withDiscourse is disabled to control memory consumption
   lazy val fastnlp = new FastNLPProcessor(withDiscourse = ShallowNLPProcessor.NO_DISCOURSE)
-  lazy val bionlp = new BioNLPProcessor(withChunks = false, withDiscourse = ShallowNLPProcessor.NO_DISCOURSE)
+
+//  lazy val engine: ExtractorEngine = createEngine()
+//
+//  private def createEngine() = {
+//    val testTxtSource = Source.fromFile("src/main/resources/rules.yaml")
+//    val str = testTxtSource.mkString
+//    testTxtSource.close()
+//    ExtractorEngine(str)
+//  }
+
+  // lazy val bionlp = new BioNLPProcessor(withChunks = false, withDiscourse = ShallowNLPProcessor.NO_DISCOURSE)
   lazy val clu = new CluProcessor()
   lazy val ef = RuleBasedEntityFinder(maxHops = 3)
 
@@ -28,13 +40,14 @@ object ProcessorsBridge {
   /** annotate text */
   def annotate(text: String): Document = toAnnotatedDocument(text, defaultProc)
   def annotateWithFastNLP(text: String): Document = toAnnotatedDocument(text, fastnlp)
-  def annotateWithBioNLP(text: String): Document = toAnnotatedDocument(text, bionlp)
+  def annotateWithFastNLPToList(text: List[String]): List[Document] = toAnnotatedDocumentForList(text, fastnlp)
+  def annotateWithBioNLP(text: String): Document = toAnnotatedDocument(text, fastnlp)
   def annotateWithClu(text: String): Document = toAnnotatedDocument(text, clu)
 
   /** Avoid sentence splitting */
   def annotate(sentences: Seq[String]): Document = toAnnotatedDocument(sentences, defaultProc)
   def annotateWithFastNLP(sentences: Seq[String]): Document = toAnnotatedDocument(sentences, fastnlp)
-  def annotateWithBioNLP(sentences: Seq[String]): Document = toAnnotatedDocument(sentences, bionlp)
+  def annotateWithBioNLP(sentences: Seq[String]): Document = toAnnotatedDocument(sentences, fastnlp)
   def annotateWithClu(sentences: Seq[String]): Document = toAnnotatedDocument(sentences, clu)
   def toAnnotatedDocument(sentences: Seq[String], proc: Processor): Document = proc.annotateFromSentences(sentences, keepText = true)
 
@@ -83,6 +96,10 @@ object ProcessorsBridge {
     proc.annotate(text, keepText = true)
   }
 
+  def toAnnotatedDocumentForList(text: List[String], proc: Processor): List[Document] = {
+    proc.annotateList(text, keepText = true)
+  }
+
   def toSentimentScores(text: String): SentimentScores = {
     val scores = CoreNLPSentimentAnalyzer.sentiment(text)
     SentimentScores(scores)
@@ -111,8 +128,20 @@ object ProcessorsBridge {
     odinMentions
   }
 
+  def getMentionsWithEngine(doc: Document, engine: ExtractorEngine): Seq[Mention] = {
+    val odinMentions = engine.extractFrom(doc)
+    odinMentions
+  }
+
   def getMentionsAsJSON(doc: Document, rules: String): JValue = {
     Try(getMentions(doc, rules)) match {
+      case Success(mentions) => ConverterUtils.toJSON(mentions)
+      case Failure(error)    => ConverterUtils.toJSON(error)
+    }
+  }
+
+  def getMentionsAsJSONWithEngine(doc: Document, engine: ExtractorEngine): JValue = {
+    Try(getMentionsWithEngine(doc, engine)) match {
       case Success(mentions) => ConverterUtils.toJSON(mentions)
       case Failure(error)    => ConverterUtils.toJSON(error)
     }

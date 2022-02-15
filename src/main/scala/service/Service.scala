@@ -10,15 +10,16 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
 import processors.{ api, ConverterUtils, ProcessorsBridge }
 import org.clulab.processors
-
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.{ jackson, DefaultFormats, JNothing, JValue }
 
+import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.ExecutionContextExecutor
 import com.typesafe.config.Config
+import org.clulab.odin.ExtractorEngine
 
 trait Service {
 
@@ -275,11 +276,32 @@ trait Service {
                   complete(json)
                 case twr if twr \ "text" != JNothing && twr \ "rules" != JNothing =>
                   logger.info(s"Odin endpoint received TextWithRules")
-                  val text = (twr \ "text").extract[String]
+//                  val text = (twr \ "text").extract[String]
+//                  val rules = (twr \ "rules").extract[String]
+//                  val document = ProcessorsBridge.annotateWithFastNLP(text)
+//                  val json = ProcessorsBridge.getMentionsAsJSON(document, rules)
+//                  complete(json)
+                  val text = (twr \ "text").extract[List[String]]
                   val rules = (twr \ "rules").extract[String]
-                  val document = ProcessorsBridge.annotateWithFastNLP(text)
-                  val json = ProcessorsBridge.getMentionsAsJSON(document, rules)
-                  complete(json)
+                  val engine = ExtractorEngine(rules)
+                  var mentions = mutable.MutableList[JValue]()
+                  var i = 0
+                  for (t <- text) {
+                    val document = ProcessorsBridge.annotateWithFastNLP(t)
+                    val json = ProcessorsBridge.getMentionsAsJSONWithEngine(document, engine)
+                    mentions += json
+                    i += 1
+                    logger.info(i.toString)
+                  }
+
+//                  val documents = ProcessorsBridge.annotateWithFastNLPToList(text)
+//                  for (t <- documents) {
+//                    val json = ProcessorsBridge.getMentionsAsJSONWithEngine(t, engine)
+//                    mentions += json
+//                    i += 1
+//                    logger.info(i.toString)
+//                  }
+                  complete(mentions)
                 case twu if twu \ "text" != JNothing && twu \ "url" != JNothing =>
                   logger.info(s"Odin endpoint received TextWithRulesURL")
                   val text = (twu \ "text").extract[String]

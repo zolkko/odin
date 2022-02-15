@@ -3,6 +3,7 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.typesafe.config.{ ConfigFactory, ConfigValueFactory }
+import processors.ProcessorsBridge
 import service.Service
 import utils._
 
@@ -44,5 +45,8 @@ object ServerConfig {
 
   def initializeResources(): Unit = {
     val _ = processors.ProcessorsBridge.defaultProc.annotate("blah")
+    //val document = processors.ProcessorsBridge.defaultProc.annotate("blah")
+    //val _ = ProcessorsBridge.getMentionsAsJSONWithEngine(document, ProcessorsBridge.engine)
+    //processors.ProcessorsBridge.engine
   }
 }

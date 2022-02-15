@@ -61,7 +61,7 @@ lazy val dockerSettings = Seq(
         tag = Some("v" + version.value)
       )
     )
-    }  
+    }
   )
 lazy val assemblySettings = Seq(
   assemblyJarName := { s"processors-server.jar" },
@@ -123,8 +123,13 @@ lazy val root = (project in file("."))
     (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
     (test in Test) := ((test in Test) dependsOn testScalastyle).value
   )
+  .aggregate(processors)
+  .dependsOn(processors)
+
 
 //logLevel := Level.Info
+
+lazy val processors = project.in(file("processors-6.3.0"))
 
 resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
@@ -149,13 +154,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http"         % akkaHTTPV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHTTPV,
     "com.typesafe.akka" %% "akka-http-xml"     % akkaHTTPV,
-    // processors
-    "org.clulab" %% "processors-main"          % procV,
-    "org.clulab" %% "processors-corenlp"       % procV,
-    "org.clulab" %% "processors-odin"          % procV,
-    "org.clulab" %% "processors-openie"          % procV,
-    "org.clulab" %% "processors-modelsmain"    % procV,
-    "org.clulab" %% "processors-modelscorenlp" % procV,
+
     // testing
     "org.specs2"        %% "specs2-core"  % "2.3.11" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaV    % "test",
