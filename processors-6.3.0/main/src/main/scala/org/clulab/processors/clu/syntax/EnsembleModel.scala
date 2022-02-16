@@ -78,14 +78,16 @@ class EnsembleModel(val individualOutputs: Array[DirectedGraph[String]]) {
     val edges = new ListBuffer[Edge[String]]
     val roots = new mutable.HashSet[Int]()
 
-    for (dep <- deps) {
+    for (dep <- deps.iterator) {
       if (dep.head == 0) {
         assert(dep.modifier > 0)
         roots += dep.modifier - 1
+        ()
       } else {
         assert(dep.modifier > 0)
         assert(dep.head > 0)
         edges += Edge[String](dep.head - 1, dep.modifier - 1, dep.label)
+        ()
       }
     }
 

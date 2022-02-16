@@ -1,9 +1,11 @@
+// val corenlpVersion = "4.4.0"
+val corenlpVersion = "3.5.1"
+
 name := "processors-corenlp"
 
 libraryDependencies ++= {
   Seq(
-    // this sub-project depends on CoreNLP
-    "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1",
-    "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1" classifier "models"
+    "edu.stanford.nlp" % "stanford-corenlp" % corenlpVersion,
+    "edu.stanford.nlp" % "stanford-corenlp" % corenlpVersion classifier "models"
   )
 }

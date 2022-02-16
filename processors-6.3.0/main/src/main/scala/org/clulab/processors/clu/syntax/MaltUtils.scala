@@ -48,8 +48,10 @@ object MaltUtils {
       // not sure why this happens, but let's manage this: create a root node in these cases
       if (head == -1) {
         roots += modifier
+        ()
       } else {
         edgeBuffer += Edge(source = head, destination = modifier, relation = in(label, internStrings))
+        ()
       }
     }
 

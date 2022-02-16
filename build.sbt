@@ -7,7 +7,6 @@ lazy val commonScalacOptions = Seq(
   "-Xlint",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
-  // "-Ywarn-value-discard",
   "-Ywarn-unused",
   // format: off
   "-encoding", "utf8"
@@ -17,13 +16,9 @@ lazy val commonScalacOptions = Seq(
 lazy val commonSettings = Seq(
   name := "processors-server",
   organization := "parsertongue",
-  scalaVersion := "2.11.11",
-  //scalaVersion := "2.12.4",
-  //crossScalaVersions := Seq("2.11.11", "2.12.4"),
-  // we want to use -Ywarn-unused-import most of the time
+  scalaVersion := "2.12.15",
   scalacOptions ++= commonScalacOptions,
   scalacOptions += "-Ywarn-unused-import",
-  // -Ywarn-unused-import is annoying in the console
   scalacOptions in (Compile, console) := commonScalacOptions,
   // show test duration
   testOptions in Test += Tests.Argument("-oD"),
@@ -63,6 +58,7 @@ lazy val dockerSettings = Seq(
     )
     }
   )
+
 lazy val assemblySettings = Seq(
   assemblyJarName := { s"processors-server.jar" },
   mainClass in assembly := Some("NLPServer")
@@ -93,41 +89,39 @@ lazy val scalaStyleSettings = Seq(
 )
 
 // format code per .scalfmt.conf
-lazy val scalaFormattingSettings = Seq(
-  scalafmtShowDiff in (ThisBuild, scalafmt) := true,
-  // run BEFORE compile, etc.
-  scalafmtOnCompile in ThisBuild := true,
-  scalafmtTestOnCompile in ThisBuild := true
-)
+//lazy val scalaFormattingSettings = Seq(
+//  scalafmtShowDiff in (ThisBuild, scalafmt) := true,
+//  // run BEFORE compile, etc.
+//  scalafmtOnCompile in ThisBuild := true,
+//  scalafmtTestOnCompile in ThisBuild := true
+//)
+//
+//lazy val testScalastyle = taskKey[Unit]("run scalastyle for tests")
+//testScalastyle := scalastyle.in(Test).toTask("").value
 
-lazy val testScalastyle = taskKey[Unit]("run scalastyle for tests")
-testScalastyle := scalastyle.in(Test).toTask("").value
-
-lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
-compileScalastyle := scalastyle.in(Compile).toTask("").value
+//lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+//compileScalastyle := scalastyle.in(Compile).toTask("").value
 
 lazy val root = (project in file("."))
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(GitVersioning)
   .enablePlugins(sbtdocker.DockerPlugin)
-  .enablePlugins(ScalastylePlugin)
+//  .enablePlugins(ScalastylePlugin)
   .settings(buildInfoSettings)
   .settings(commonSettings)
   .settings(dockerSettings)
   .settings(assemblySettings)
   .settings(scalaStyleSettings)
-  .settings(scalaFormattingSettings)
+//  .settings(scalaFormattingSettings)
   .settings(
     name := "processors-server",
-    aggregate in test := false,
-    (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
-    (test in Test) := ((test in Test) dependsOn testScalastyle).value
+    aggregate in test := false //,
+//    (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
+//    (test in Test) := ((test in Test) dependsOn testScalastyle).value
   )
   .aggregate(processors)
   .dependsOn(processors)
 
-
-//logLevel := Level.Info
 
 lazy val processors = project.in(file("processors-6.3.0"))
 
@@ -136,15 +130,15 @@ resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 val procV = "6.3.0"
 
 libraryDependencies ++= {
-  val akkaV = "2.5.9"
+  val akkaV = "2.6.18"
   val akkaHTTPV = "10.1.0-RC2"
-  val json4sV = "3.5.3"
+  val json4sV = "4.0.3" // "3.5.3"
 
   Seq(
-    "com.typesafe"      % "config"            % "1.3.0",
+    "com.typesafe"      % "config"            % "1.4.2",
     "org.json4s"        %% "json4s-core"      % json4sV,
     "org.json4s"        %% "json4s-jackson"   % json4sV,
-    "de.heikoseeberger" %% "akka-http-json4s" % "1.20.0-RC2",
+    "de.heikoseeberger" %% "akka-http-json4s" % "1.39.2", // "1.20.1",
     // AKKA
     "com.typesafe.akka" %% "akka-actor"  % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
@@ -156,13 +150,13 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-xml"     % akkaHTTPV,
 
     // testing
-    "org.specs2"        %% "specs2-core"  % "2.3.11" % "test",
+    "org.specs2"        %% "specs2-core"  % "4.13.3" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaV    % "test",
     // logging
-    "ch.qos.logback"             % "logback-classic" % "1.1.7",
-    "com.typesafe.scala-logging" %% "scala-logging"  % "3.4.0",
+    "ch.qos.logback"             % "logback-classic" % "1.2.10",
+    "com.typesafe.scala-logging" %% "scala-logging"  % "3.9.4",
     // testing
-    "org.scalatest" %% "scalatest" % "2.2.6" % Test
+    "org.scalatest" %% "scalatest" % "3.2.11" % Test
   )
 }
 

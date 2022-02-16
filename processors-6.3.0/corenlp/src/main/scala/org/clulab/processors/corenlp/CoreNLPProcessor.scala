@@ -73,6 +73,7 @@ class CoreNLPProcessor(
       val stanfordTree = stanfordParse(sa)
 
       // store Stanford annotations; Stanford dependencies are created here!
+      // ParserAnnotatorUtils.fillInParseAnnotations(false, true, gsf, sa, java.util.List.of(stanfordTree), GrammaticalStructure.Extras.NONE)
       ParserAnnotatorUtils.fillInParseAnnotations(false, true, gsf, sa, stanfordTree, GrammaticalStructure.Extras.NONE)
 
       // save our own structures

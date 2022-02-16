@@ -6,7 +6,7 @@ import org.clulab.processors.{ Document, Sentence }
 import org.clulab.serialization.json.JSONSerializer
 import org.clulab.serialization.json._
 import org.clulab.odin.serialization.json.{ JSONSerializer => _, _ }
-import org.json4s.JValue
+import org.json4s._
 import org.json4s.JsonDSL._
 import scala.io.Source
 import utils._

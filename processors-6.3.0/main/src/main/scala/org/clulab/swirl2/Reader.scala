@@ -171,10 +171,13 @@ class Reader {
     val roots = new mutable.HashSet[Int]()
     for (modifier <- tokens.indices) {
       val head = tokens(modifier).dep._1
-      if (head >= 0)
+      if (head >= 0) {
         edges += new Tuple3(head, modifier, tokens(modifier).dep._2)
-      else
+        ()
+      } else {
         roots += modifier
+        ()
+      }
     }
     DirectedGraph[String](DirectedGraph.triplesToEdges[String](edges.toList), roots.toSet)
   }
